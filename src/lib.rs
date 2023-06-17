@@ -85,14 +85,16 @@ pub mod polygon;
 pub mod delaunator;
 
 use maybe_parallel_iterator::{IntoMaybeParallelIterator, IntoMaybeParallelRefIterator};
+use serde::Serialize;
+use ts_rs::TS;
 use std::{f64, usize};
 
 use crate::delaunator::*;
 use crate::polygon::*;
 
 /// Represents a centroidal tesselation diagram.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct CentroidDiagram<C: Coord + Vector<C>> {
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Serialize)]
+pub struct CentroidDiagram<C: Coord + Vector<C> + TS> {
     /// Contains the input data
     pub sites: Vec<C>,
     /// A [`Triangulation`] struct that contains the Delaunay triangulation information.
@@ -107,7 +109,7 @@ pub struct CentroidDiagram<C: Coord + Vector<C>> {
     pub neighbors: Vec<Vec<usize>>,
 }
 
-impl<C: Coord + Vector<C>> CentroidDiagram<C> {
+impl<C: Coord + Vector<C> + TS> CentroidDiagram<C> {
     /// Creates a centroidal tesselation, if it exists, for a given set of points.
     ///
     /// Points are represented here as a `delaunator::Point`.
@@ -153,7 +155,7 @@ impl<C: Coord + Vector<C>> CentroidDiagram<C> {
     }
 }
 
-fn helper_points<C: Coord>(polygon: &Polygon<C>) -> Vec<C> {
+fn helper_points<C: Coord + TS>(polygon: &Polygon<C>) -> Vec<C> {
     let mut points = vec![];
 
     let mut min = Point{x: f64::MAX, y: f64::MAX};
@@ -186,7 +188,9 @@ fn helper_points<C: Coord>(polygon: &Polygon<C>) -> Vec<C> {
 }
 
 /// Represents a Voronoi diagram.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Serialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
 pub struct VoronoiDiagram<C: Coord + Vector<C>> {
     /// Contains the input data
     pub sites: Vec<C>,
@@ -204,7 +208,7 @@ pub struct VoronoiDiagram<C: Coord + Vector<C>> {
     num_helper_points: usize,
 }
 
-impl<C: Coord + Vector<C>> VoronoiDiagram<C> {
+impl<C: Coord + Vector<C> + TS> VoronoiDiagram<C> {
     /// Creates a Voronoi diagram, if it exists, for a given set of points.
     ///
     /// Points are represented here as anything that implements [`delaunator::Coord` and `delaunator::Vector<Coord>`].
@@ -288,7 +292,7 @@ impl<C: Coord + Vector<C>> VoronoiDiagram<C> {
     }
 }
 
-fn calculate_centroids<C: Coord + Vector<C>>(points: &[C], delaunay: &Triangulation) -> Vec<C> {
+fn calculate_centroids<C: Coord + Vector<C> + TS>(points: &[C], delaunay: &Triangulation) -> Vec<C> {
     let num_triangles = delaunay.len();
     let mut centroids = Vec::with_capacity(num_triangles);
     for t in 0..num_triangles {
@@ -307,7 +311,7 @@ fn calculate_centroids<C: Coord + Vector<C>>(points: &[C], delaunay: &Triangulat
     centroids
 }
 
-fn calculate_circumcenters<C: Coord + Vector<C>>(points: &[C], delaunay: &Triangulation) -> Vec<C> {
+fn calculate_circumcenters<C: Coord + Vector<C> + TS>(points: &[C], delaunay: &Triangulation) -> Vec<C> {
     (0..delaunay.len()).into_maybe_par_iter().map(|t| {
         let v: Vec<C> = points_of_triangle(t, delaunay)
         .into_iter()
@@ -321,7 +325,7 @@ fn calculate_circumcenters<C: Coord + Vector<C>>(points: &[C], delaunay: &Triang
     }).collect()
 }
 
-fn calculate_neighbors<C: Coord + Vector<C>>(points: &[C], delaunay: &Triangulation) -> Vec<Vec<usize>> {
+fn calculate_neighbors<C: Coord + Vector<C> + TS>(points: &[C], delaunay: &Triangulation) -> Vec<Vec<usize>> {
     points.maybe_par_iter().enumerate().map(|(t, _point)| {
         let mut neighbours: Vec<usize> = vec![];
 

@@ -16,10 +16,14 @@
 //! }
 //!
 
+use serde::Serialize;
+use ts_rs::TS;
 use crate::delaunator::Coord;
 
 /// Represents a polygon.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Serialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
 pub struct Polygon<C: Coord> {
     pub(crate) points: Vec<C>,
 }
@@ -67,7 +71,7 @@ fn intersection<C: Coord>(cp1: &C, cp2: &C, s: &C, e: &C) -> C {
 }
 
 /// Sutherland-Hodgman clipping modified from https://rosettacode.org/wiki/Sutherland-Hodgman_polygon_clipping#C.2B.2B
-pub fn sutherland_hodgman<C: Coord + Clone>(subject: &Polygon<C>, clip: &Polygon<C>) -> Polygon<C> {
+pub fn sutherland_hodgman<C: Coord + Clone + TS>(subject: &Polygon<C>, clip: &Polygon<C>) -> Polygon<C> {
     let mut output_polygon = Polygon::new();
     let mut input_polygon = Polygon::new();
 
