@@ -99,7 +99,7 @@ pub const INVALID_INDEX: usize = usize::max_value();
 /// impl Vector<Point> for Point {}
 /// ```
 ///
-pub trait Coord: Sync + Send + Clone + TS {
+pub trait Coord: Sync + Send + Clone {
     /// Create a coordinate from (x, y) positions
     fn from_xy(x: f64, y: f64) -> Self;
     /// Return x coordinate

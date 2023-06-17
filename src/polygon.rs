@@ -18,29 +18,29 @@
 
 use serde::Serialize;
 use ts_rs::TS;
-use crate::delaunator::Coord;
+use crate::delaunator::{Coord, Point};
 
 /// Represents a polygon.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Serialize, TS)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, TS)]
 #[serde(rename_all = "camelCase")]
 #[ts(export)]
-pub struct Polygon<C: Coord> {
-    pub(crate) points: Vec<C>,
+pub struct Polygon {
+    pub(crate) points: Vec<Point>,
 }
 
-impl<C: Coord> Polygon<C> {
+impl Polygon {
     /// Create an empty polygon with no points.
     pub fn new() -> Self {
         Polygon { points: Vec::new() }
     }
 
     /// Create a polygon consisting of the points supplied.
-    pub fn from_points(points: Vec<C>) -> Self {
+    pub fn from_points(points: Vec<Point>) -> Self {
         Polygon { points }
     }
 
     /// Return a slice of points representing the polygon.
-    pub fn points(&self) -> &[C] {
+    pub fn points(&self) -> &[Point] {
         &self.points
     }
 }
@@ -71,7 +71,7 @@ fn intersection<C: Coord>(cp1: &C, cp2: &C, s: &C, e: &C) -> C {
 }
 
 /// Sutherland-Hodgman clipping modified from https://rosettacode.org/wiki/Sutherland-Hodgman_polygon_clipping#C.2B.2B
-pub fn sutherland_hodgman<C: Coord + Clone + TS>(subject: &Polygon<C>, clip: &Polygon<C>) -> Polygon<C> {
+pub fn sutherland_hodgman(subject: &Polygon, clip: &Polygon) -> Polygon {
     let mut output_polygon = Polygon::new();
     let mut input_polygon = Polygon::new();
 
